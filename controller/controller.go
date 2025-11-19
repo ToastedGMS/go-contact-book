@@ -25,6 +25,8 @@ func ListContactsHandler(w http.ResponseWriter, r *http.Request){
 		return 
 	}
 
+	if r.URL.Query().Get("name") == "" {
+
 	contacts, err := contactbook.ListContacts()
 	if err != nil {
 		http.Error(w, "Error retrieving contacts", http.StatusInternalServerError)
@@ -34,4 +36,14 @@ func ListContactsHandler(w http.ResponseWriter, r *http.Request){
 	if err := json.NewEncoder(w).Encode(contacts); err != nil {
 		log.Printf("Error encoding contacts to JSON: %v", err)
 	}
+} else {
+	queryParams := r.URL.Query()
+	name := queryParams.Get("name")
+
+	results := contactbook.SearchContacts(name)
+
+	if err := json.NewEncoder(w).Encode(results); err != nil {
+		log.Printf("Error encoding search results to JSON: %v", err)
+	}
+}
 }
