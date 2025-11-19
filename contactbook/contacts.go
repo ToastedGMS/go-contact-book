@@ -12,12 +12,24 @@ type ContactBook struct {
 }
 
 type Contact struct {
-	ID int `json:"ID"`
-	Name string `json:"Name"`
+	ID    int    `json:"ID"`
+	Name  string `json:"Name"`
 	Phone string `json:"Phone"`
 }
 
-func AddContact(name, phone string) error{
+func nextID(contacts []Contact) int {
+
+	maxID := 0
+	for _, c := range contacts {
+		if c.ID > maxID {
+			maxID = c.ID
+		}
+	}
+
+	return maxID + 1
+}
+
+func AddContact(name, phone string) error {
 
 	fileBytes, err := os.ReadFile("contacts.json")
 	if err != nil {
@@ -31,8 +43,7 @@ func AddContact(name, phone string) error{
 	}
 
 	existingContacts := contactBook.Contacts
-	var nextID = len(existingContacts) + 1
-	contact := Contact{ID: nextID,Name: name, Phone: phone}
+	contact := Contact{ID: nextID(existingContacts), Name: name, Phone: phone}
 	updatedContacts := append(existingContacts, contact)
 
 	contactsData := ContactBook{Contacts: updatedContacts}
@@ -49,9 +60,9 @@ func AddContact(name, phone string) error{
 
 	fmt.Println("Contact added successfully.")
 	return nil
-} 
+}
 
-func ListContacts() ([]Contact, error){
+func ListContacts() ([]Contact, error) {
 	fmt.Println("Accessing Contact Book...")
 	jsonData, err := os.ReadFile("contacts.json")
 	if err != nil {
@@ -66,7 +77,7 @@ func ListContacts() ([]Contact, error){
 
 }
 
-func SearchContacts(name string) []Contact{
+func SearchContacts(name string) []Contact {
 	results, err := ListContacts()
 	if err != nil {
 		fmt.Println("Error reading contacts")
@@ -80,4 +91,3 @@ func SearchContacts(name string) []Contact{
 	}
 	return filteredResults
 }
-
