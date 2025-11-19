@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type ContactBook struct {
@@ -62,7 +63,7 @@ func SearchContacts(name string) []Contact{
 	}
 	var filteredResults []Contact
 	for _, contact := range results {
-		if contact.Name == name {
+		if strings.EqualFold(contact.Name, name) {
 			filteredResults = append(filteredResults, contact)
 		}
 	}
