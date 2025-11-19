@@ -18,6 +18,7 @@ func RunServer(){
         controller.UnknownRouteHandler(w, r)
     })
 	http.HandleFunc("/contacts", controller.ListContactsHandler)
+	http.HandleFunc("/contacts/add", controller.AddContactHandler )
 
 	const port = "8080"
 	fmt.Printf("Listening on port %s\n", port)
