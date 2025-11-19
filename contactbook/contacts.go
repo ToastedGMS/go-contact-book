@@ -12,16 +12,27 @@ type ContactBook struct {
 }
 
 type Contact struct {
+	ID int `json:"ID"`
 	Name string `json:"Name"`
 	Phone string `json:"Phone"`
 }
 
 func AddContact(name, phone string) error{
-	contact := Contact{Name: name, Phone: phone}
-	existingContacts, err := ListContacts()
+
+	fileBytes, err := os.ReadFile("contacts.json")
 	if err != nil {
 		return err
 	}
+
+	var contactBook ContactBook
+	err = json.Unmarshal(fileBytes, &contactBook)
+	if err != nil {
+		return err
+	}
+
+	existingContacts := contactBook.Contacts
+	var nextID = len(existingContacts) + 1
+	contact := Contact{ID: nextID,Name: name, Phone: phone}
 	updatedContacts := append(existingContacts, contact)
 
 	contactsData := ContactBook{Contacts: updatedContacts}
