@@ -9,7 +9,7 @@ import (
 	"github.com/ToastedGMS/go-contact-book/contactbook"
 )
 
-func ServerStartHandler(w http.ResponseWriter, r *http.Request){
+func ServerStartHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello World!")
 }
 
@@ -17,17 +17,17 @@ func UnknownRouteHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "This route does not exist", http.StatusNotFound)
 }
 
-func ListContactsHandler(w http.ResponseWriter, r *http.Request){
+func ListContactsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return 
+		return
 	}
 
 	if r.URL.Query().Get("name") == "" {
 
-	contacts, err := contactbook.ListContacts()
+		contacts, err := contactbook.ListContacts()
 		if err != nil {
 			http.Error(w, "Error retrieving contacts", http.StatusInternalServerError)
 			return
@@ -48,10 +48,10 @@ func ListContactsHandler(w http.ResponseWriter, r *http.Request){
 	}
 }
 
-func AddContactHandler(w http.ResponseWriter, r *http.Request){
+func AddContactHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Method != "POST"{
+	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
@@ -65,7 +65,7 @@ func AddContactHandler(w http.ResponseWriter, r *http.Request){
 	}
 
 	err = contactbook.AddContact(contact.Name, contact.Phone)
-	if err!= nil {
+	if err != nil {
 		http.Error(w, "Error adding contact", http.StatusInternalServerError)
 		return
 	}

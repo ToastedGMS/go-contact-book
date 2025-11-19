@@ -4,6 +4,6 @@ import (
 	"github.com/ToastedGMS/go-contact-book/server"
 )
 
-func main(){
+func main() {
 	server.RunServer()
 }

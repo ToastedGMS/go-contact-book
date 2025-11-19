@@ -8,17 +8,17 @@ import (
 	"github.com/ToastedGMS/go-contact-book/controller"
 )
 
-func RunServer(){
+func RunServer() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-        if r.URL.Path == "/" {
-            controller.ServerStartHandler(w, r)
-            return
-        }
-        
-        controller.UnknownRouteHandler(w, r)
-    })
+		if r.URL.Path == "/" {
+			controller.ServerStartHandler(w, r)
+			return
+		}
+
+		controller.UnknownRouteHandler(w, r)
+	})
 	http.HandleFunc("/contacts", controller.ListContactsHandler)
-	http.HandleFunc("/contacts/add", controller.AddContactHandler )
+	http.HandleFunc("/contacts/add", controller.AddContactHandler)
 
 	const port = "8080"
 	fmt.Printf("Listening on port %s\n", port)
