@@ -2,6 +2,7 @@ package contactbook
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -29,6 +30,15 @@ func nextID(contacts []Contact) int {
 	return maxID + 1
 }
 
+func checkExistingContact(name string, contacts []Contact) bool {
+	for _, c := range contacts {
+		if strings.EqualFold(name, c.Name) {
+			return true
+		}
+	}
+	return false
+}
+
 func AddContact(name, phone string) error {
 
 	fileBytes, err := os.ReadFile("contacts.json")
@@ -43,23 +53,27 @@ func AddContact(name, phone string) error {
 	}
 
 	existingContacts := contactBook.Contacts
-	contact := Contact{ID: nextID(existingContacts), Name: name, Phone: phone}
-	updatedContacts := append(existingContacts, contact)
+	if checkExistingContact(name, existingContacts) {
+		return errors.New("Contact already exists")
+	} else {
+		contact := Contact{ID: nextID(existingContacts), Name: name, Phone: phone}
+		updatedContacts := append(existingContacts, contact)
 
-	contactsData := ContactBook{Contacts: updatedContacts}
-	byteData, err := json.Marshal(contactsData)
-	if err != nil {
-		return err
+		contactsData := ContactBook{Contacts: updatedContacts}
+		byteData, err := json.Marshal(contactsData)
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile("contacts.json", byteData, 0666)
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Contact added successfully.")
+		return nil
 	}
-
-	err = os.WriteFile("contacts.json", byteData, 0666)
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Contact added successfully.")
-	return nil
 }
 
 func ListContacts() ([]Contact, error) {
