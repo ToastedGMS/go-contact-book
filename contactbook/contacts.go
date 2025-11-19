@@ -15,11 +15,6 @@ type Contact struct {
 	Phone string `json:"Phone"`
 }
 
-var contacts = []Contact{
-	{Name: "Hulk", Phone: "777-777-7777"},
-	{Name: "Arana", Phone: "131-313-1313"},
-}
-
 func AddContact(name, phone string) error{
 	contact := Contact{Name: name, Phone: phone}
 	existingContacts, err := ListContacts()
