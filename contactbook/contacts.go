@@ -1,4 +1,4 @@
-package main
+package contactbook
 
 import (
 	"encoding/json"
