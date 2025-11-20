@@ -105,3 +105,37 @@ func SearchContacts(name string) []Contact {
 	}
 	return filteredResults
 }
+
+func DeleteContact(ID int) error {
+	fileBytes, err := os.ReadFile("contacts.json")
+	if err != nil {
+		return err
+	}
+
+	var contactBook ContactBook
+	err = json.Unmarshal(fileBytes, &contactBook)
+	if err != nil {
+		return err
+	}
+
+	updatedContacts := []Contact{}
+	for _, contact := range contactBook.Contacts {
+		if contact.ID != ID {
+			updatedContacts = append(updatedContacts, contact)
+		}
+	}
+	contactsData := ContactBook{Contacts: updatedContacts}
+	byteData, err := json.Marshal(contactsData)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile("contacts.json", byteData, 0666)
+
+	if err != nil {
+		return err
+	} else {
+		fmt.Println("Contact deleted successfully.")
+		return nil
+	}
+}

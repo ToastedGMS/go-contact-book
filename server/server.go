@@ -19,6 +19,7 @@ func RunServer() {
 	})
 	http.HandleFunc("/contacts", controller.ListContactsHandler)
 	http.HandleFunc("/contacts/add", controller.AddContactHandler)
+	http.HandleFunc("/contacts/delete", controller.DeleteContactHandler)
 
 	const port = "8080"
 	fmt.Printf("Listening on port %s\n", port)

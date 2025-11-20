@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/ToastedGMS/go-contact-book/contactbook"
 )
@@ -72,4 +73,32 @@ func AddContactHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintf(w, "{\"message\": \"Contact added successfully\"}")
+}
+
+func DeleteContactHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != "DELETE" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var queryParams = r.URL.Query()
+	ID := queryParams.Get("ID")
+
+	num, err := strconv.Atoi(ID)
+	if err != nil {
+		http.Error(w, "Internal Server Error, please try again", http.StatusInternalServerError)
+		return
+	}
+
+	err = contactbook.DeleteContact(num)
+	if err != nil {
+		http.Error(w, "Error during contact deletion", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "{\"message\": \"Contact deleted successfully\"}")
+
 }
