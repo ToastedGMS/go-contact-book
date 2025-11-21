@@ -9,7 +9,8 @@ import (
 )
 
 func RunServer() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
 			controller.ServerStartHandler(w, r)
 			return
@@ -17,15 +18,15 @@ func RunServer() {
 
 		controller.UnknownRouteHandler(w, r)
 	})
-	http.HandleFunc("/contacts", controller.ListContactsHandler)
-	http.HandleFunc("/contacts/add", controller.AddContactHandler)
-	http.HandleFunc("/contacts/delete", controller.DeleteContactHandler)
-	http.HandleFunc("/contacts/edit", controller.EditContactHandler)
+	mux.HandleFunc("GET /contacts", controller.ListContactsHandler)
+	mux.HandleFunc("POST /contacts/", controller.AddContactHandler)
+	mux.HandleFunc("DELETE /contacts/{ID}", controller.DeleteContactHandler)
+	mux.HandleFunc("PATCH /contacts/{ID}", controller.EditContactHandler)
 
 	const port = "8080"
 	fmt.Printf("Listening on port %s\n", port)
 
-	err := http.ListenAndServe(":"+port, nil)
+	err := http.ListenAndServe(":"+port, mux)
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
