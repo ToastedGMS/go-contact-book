@@ -102,3 +102,37 @@ func DeleteContactHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "{\"message\": \"Contact deleted successfully\"}")
 
 }
+
+func EditContactHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method != "PATCH" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var queryParams = r.URL.Query()
+	ID := queryParams.Get("ID")
+
+	var contact contactbook.Contact
+	err := json.NewDecoder(r.Body).Decode(&contact)
+	if err != nil {
+		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	num, err := strconv.Atoi(ID)
+	if err != nil {
+		http.Error(w, "Internal Server Error, please try again", http.StatusInternalServerError)
+		return
+	}
+
+	err = contactbook.EditContact(num, contact.Name, contact.Phone)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, "{\"message\": \"Contact edited successfully\" }")
+}

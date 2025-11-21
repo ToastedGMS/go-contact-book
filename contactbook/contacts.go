@@ -139,3 +139,41 @@ func DeleteContact(ID int) error {
 		return nil
 	}
 }
+
+func EditContact(ID int, name string, phone string) error {
+	fileBytes, err := os.ReadFile("contacts.json")
+	if err != nil {
+		return err
+	}
+
+	var contactBook ContactBook
+	err = json.Unmarshal(fileBytes, &contactBook)
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for i, contact := range contactBook.Contacts {
+		if contact.ID == ID {
+			contactBook.Contacts[i].Name = name
+			contactBook.Contacts[i].Phone = phone
+			found = true
+			break
+		}
+	}
+	if !found {
+		return errors.New("Contact not found")
+	}
+
+	byteData, err := json.Marshal(contactBook)
+	if err != nil {
+		return err
+	}
+
+	err = os.WriteFile("contacts.json", byteData, 0666)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
