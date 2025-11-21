@@ -21,11 +21,6 @@ func UnknownRouteHandler(w http.ResponseWriter, r *http.Request) {
 func ListContactsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	if r.URL.Query().Get("name") == "" {
 
 		contacts, err := contactbook.ListContacts()
@@ -52,11 +47,6 @@ func ListContactsHandler(w http.ResponseWriter, r *http.Request) {
 func AddContactHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	var contact contactbook.Contact
 
 	err := json.NewDecoder(r.Body).Decode(&contact)
@@ -78,14 +68,7 @@ func AddContactHandler(w http.ResponseWriter, r *http.Request) {
 func DeleteContactHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Method != "DELETE" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var queryParams = r.URL.Query()
-	ID := queryParams.Get("ID")
-
+	ID := r.PathValue("ID")
 	num, err := strconv.Atoi(ID)
 	if err != nil {
 		http.Error(w, "Internal Server Error, please try again", http.StatusInternalServerError)
@@ -106,14 +89,6 @@ func DeleteContactHandler(w http.ResponseWriter, r *http.Request) {
 func EditContactHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	if r.Method != "PATCH" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var queryParams = r.URL.Query()
-	ID := queryParams.Get("ID")
-
 	var contact contactbook.Contact
 	err := json.NewDecoder(r.Body).Decode(&contact)
 	if err != nil {
@@ -121,7 +96,8 @@ func EditContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	num, err := strconv.Atoi(ID)
+	id := r.PathValue("ID")
+	num, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, "Internal Server Error, please try again", http.StatusInternalServerError)
 		return
