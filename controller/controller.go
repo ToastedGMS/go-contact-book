@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/ToastedGMS/go-contact-book/contactbook"
+	"github.com/ToastedGMS/go-contact-book/service"
 )
 
 func ServerStartHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,7 @@ func ListContactsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Query().Get("name") == "" {
 
-		contacts, err := contactbook.ListContacts()
+		contacts, err := service.ListContacts()
 		if err != nil {
 			http.Error(w, "Error retrieving contacts", http.StatusInternalServerError)
 			return
@@ -36,7 +36,7 @@ func ListContactsHandler(w http.ResponseWriter, r *http.Request) {
 		queryParams := r.URL.Query()
 		name := queryParams.Get("name")
 
-		results := contactbook.SearchContacts(name)
+		results := service.SearchContacts(name)
 
 		if err := json.NewEncoder(w).Encode(results); err != nil {
 			log.Printf("Error encoding search results to JSON: %v", err)
@@ -47,7 +47,7 @@ func ListContactsHandler(w http.ResponseWriter, r *http.Request) {
 func AddContactHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var contact contactbook.Contact
+	var contact service.Contact
 
 	err := json.NewDecoder(r.Body).Decode(&contact)
 	if err != nil {
@@ -55,7 +55,7 @@ func AddContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = contactbook.AddContact(contact.Name, contact.Phone)
+	err = service.AddContact(contact.Name, contact.Phone)
 	if err != nil {
 		http.Error(w, "Error adding contact", http.StatusInternalServerError)
 		return
@@ -75,7 +75,7 @@ func DeleteContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = contactbook.DeleteContact(num)
+	err = service.DeleteContact(num)
 	if err != nil {
 		http.Error(w, "Error during contact deletion", http.StatusInternalServerError)
 		return
@@ -89,7 +89,7 @@ func DeleteContactHandler(w http.ResponseWriter, r *http.Request) {
 func EditContactHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var contact contactbook.Contact
+	var contact service.Contact
 	err := json.NewDecoder(r.Body).Decode(&contact)
 	if err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
@@ -103,7 +103,7 @@ func EditContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = contactbook.EditContact(num, contact.Name, contact.Phone)
+	err = service.EditContact(num, contact.Name, contact.Phone)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
