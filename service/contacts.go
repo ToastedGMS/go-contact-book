@@ -1,24 +1,14 @@
 package service
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
-	"os"
 	"strings"
+
+	"github.com/ToastedGMS/go-contact-book/models"
+	"github.com/ToastedGMS/go-contact-book/repository"
 )
 
-type ContactBook struct {
-	Contacts []Contact `json:"contacts"`
-}
-
-type Contact struct {
-	ID    int    `json:"ID"`
-	Name  string `json:"Name"`
-	Phone string `json:"Phone"`
-}
-
-func nextID(contacts []Contact) int {
+func nextID(contacts []models.Contact) int {
 
 	maxID := 0
 	for _, c := range contacts {
@@ -30,7 +20,7 @@ func nextID(contacts []Contact) int {
 	return maxID + 1
 }
 
-func checkExistingContact(name string, contacts []Contact) bool {
+func checkExistingContact(name string, contacts []models.Contact) bool {
 	for _, c := range contacts {
 		if strings.EqualFold(name, c.Name) {
 			return true
@@ -39,65 +29,56 @@ func checkExistingContact(name string, contacts []Contact) bool {
 	return false
 }
 
-func AddContact(name, phone string) error {
+func appendContact(name, phone string, existingContacts []models.Contact) []models.Contact {
 
-	fileBytes, err := os.ReadFile("contacts.json")
+	contact := models.Contact{ID: nextID(existingContacts), Name: name, Phone: phone}
+	updatedContacts := append(existingContacts, contact)
+	return updatedContacts
+
+}
+
+func AddContact(name, phone string, repo repository.Repository) error {
+
+	contactBook, err := repo.Read()
 	if err != nil {
 		return err
 	}
-
-	var contactBook ContactBook
-	err = json.Unmarshal(fileBytes, &contactBook)
-	if err != nil {
-		return err
-	}
-
 	existingContacts := contactBook.Contacts
+
 	if checkExistingContact(name, existingContacts) {
-		return errors.New("Contact already exists")
+
+		return errors.New("contact already exists")
+
 	} else {
-		contact := Contact{ID: nextID(existingContacts), Name: name, Phone: phone}
-		updatedContacts := append(existingContacts, contact)
 
-		contactsData := ContactBook{Contacts: updatedContacts}
-		byteData, err := json.Marshal(contactsData)
+		contactBook.Contacts = appendContact(name, phone, existingContacts)
+
+		err = repo.Write(contactBook)
 		if err != nil {
 			return err
 		}
 
-		err = os.WriteFile("contacts.json", byteData, 0666)
-
-		if err != nil {
-			return err
-		}
-
-		fmt.Println("Contact added successfully.")
 		return nil
 	}
 }
 
-func ListContacts() ([]Contact, error) {
-	fmt.Println("Accessing Contact Book...")
-	jsonData, err := os.ReadFile("contacts.json")
+func ListContacts(repo repository.Repository) ([]models.Contact, error) {
+
+	contactBook, err := repo.Read()
 	if err != nil {
 		return nil, err
 	}
-	var contactBook ContactBook
-	err = json.Unmarshal(jsonData, &contactBook)
-	if err != nil {
-		return nil, err
-	}
+
 	return contactBook.Contacts, nil
 
 }
 
-func SearchContacts(name string) []Contact {
-	results, err := ListContacts()
+func SearchContacts(name string, repo repository.Repository) []models.Contact {
+	results, err := ListContacts(repo)
 	if err != nil {
-		fmt.Println("Error reading contacts")
 		return nil
 	}
-	var filteredResults []Contact
+	var filteredResults []models.Contact
 	for _, contact := range results {
 		if strings.EqualFold(contact.Name, name) {
 			filteredResults = append(filteredResults, contact)
@@ -106,48 +87,33 @@ func SearchContacts(name string) []Contact {
 	return filteredResults
 }
 
-func DeleteContact(ID int) error {
-	fileBytes, err := os.ReadFile("contacts.json")
+func DeleteContact(ID int, repo repository.Repository) error {
+
+	contactBook, err := repo.Read()
 	if err != nil {
 		return err
 	}
 
-	var contactBook ContactBook
-	err = json.Unmarshal(fileBytes, &contactBook)
-	if err != nil {
-		return err
-	}
-
-	updatedContacts := []Contact{}
+	updatedContacts := []models.Contact{}
 	for _, contact := range contactBook.Contacts {
 		if contact.ID != ID {
 			updatedContacts = append(updatedContacts, contact)
 		}
 	}
-	contactsData := ContactBook{Contacts: updatedContacts}
-	byteData, err := json.Marshal(contactsData)
+
+	contactsData := models.ContactBook{Contacts: updatedContacts}
+	err = repo.Write(contactsData)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile("contacts.json", byteData, 0666)
+	return nil
 
-	if err != nil {
-		return err
-	} else {
-		fmt.Println("Contact deleted successfully.")
-		return nil
-	}
 }
 
-func EditContact(ID int, name string, phone string) error {
-	fileBytes, err := os.ReadFile("contacts.json")
-	if err != nil {
-		return err
-	}
+func EditContact(ID int, name string, phone string, repo repository.Repository) error {
 
-	var contactBook ContactBook
-	err = json.Unmarshal(fileBytes, &contactBook)
+	contactBook, err := repo.Read()
 	if err != nil {
 		return err
 	}
@@ -162,15 +128,10 @@ func EditContact(ID int, name string, phone string) error {
 		}
 	}
 	if !found {
-		return errors.New("Contact not found")
+		return errors.New("contact not found")
 	}
 
-	byteData, err := json.Marshal(contactBook)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile("contacts.json", byteData, 0666)
+	err = repo.Write(contactBook)
 	if err != nil {
 		return err
 	}
