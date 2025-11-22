@@ -2,7 +2,6 @@ package repository
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
 
 	"github.com/ToastedGMS/go-contact-book/models"
@@ -12,9 +11,6 @@ type Repository interface {
 	Read() (models.ContactBook, error)
 	Write(models.ContactBook) error
 }
-
-var ErrNotFound = errors.New("repository: resource not found")
-var ErrSaveFailed = errors.New("repository: save operation failed")
 
 type JSONrepository struct {
 	FilePath string
