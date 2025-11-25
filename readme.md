@@ -25,7 +25,7 @@ This project uses Go for the server logic and **SQLite** for persistence.
 ### 1. Clone the Repository
 
 ```bash
-git clone <your_repo_url>
+git clone git@github.com:ToastedGMS/go-contact-book.git
 cd go-contact-book
 ```
 
