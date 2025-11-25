@@ -9,6 +9,7 @@ This is a project I'm using to learn the Go language. It started off as a CLI to
 - Implement all CRUD operations related to contacts
 - Implement RESTFUL endpoints for executing CRUD operations
 - Implement Repository Pattern to better handle Separation of Concerns between application layers
-- (We are here) Implementing unit tests for service layer functions
+- Implement unit tests for service layer functions
+- Implement SQLite database storage
 
 ![Go Logo](https://img.shields.io/badge/golang-00ADD8?&style=plastic&logo=go&logoColor=white)
