@@ -1,16 +1,27 @@
 package server
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/ToastedGMS/go-contact-book/controller"
 	"github.com/ToastedGMS/go-contact-book/repository"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func RunServer() {
-	repo := &repository.JSONrepository{FilePath: "contacts.json"}
+	const dbFilePath = "./contacts.db"
+	db, err := sql.Open("sqlite3", dbFilePath)
+	if err != nil {
+		log.Fatalf("Error opening SQLite database at %s: %v", dbFilePath, err)
+	}
+	defer db.Close()
+	repo := &repository.SQLRepository{DB: db}
+	if err := repo.SetupTables(); err != nil {
+		log.Fatalf("Error setting up contacts table: %v", err)
+	}
 	controller := &controller.Controller{Repo: repo}
 
 	mux := http.NewServeMux()
@@ -30,7 +41,7 @@ func RunServer() {
 	const port = "8080"
 	fmt.Printf("Listening on port %s\n", port)
 
-	err := http.ListenAndServe(":"+port, mux)
+	err = http.ListenAndServe(":"+port, mux)
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
